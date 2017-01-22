@@ -5,40 +5,60 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"./config"
+	//"path"
+	"bot/config"
 	"github.com/go-telegram-bot-api/telegram-bot-api"
-	"github.com/lazywei/go-opencv"
+	//"github.com/lazywei/go-opencv/opencv"
 )
 
 var conf  = config.GetConf()
 
-func processImg() {
+//func processImg() {
+//
+//}
 
-}
+//func findFace(filepath string) {
+	//image := opencv.LoadImage(filepath)
+	//
+	//cascade := opencv.LoadHaarClassifierCascade(path.Join(path.Dir(currentfile), "haarcascade_frontalface_alt.xml"))
+	//faces := cascade.DetectObjects(image)
+	//
+	//for _, value := range faces {
+	//	opencv.Rectangle(image,
+	//		opencv.Point{value.X() + value.Width(), value.Y()},
+	//		opencv.Point{value.X(), value.Y() + value.Height()},
+	//		opencv.ScalarAll(255.0), 1, 1, 0)
+	//}
+	//
+	//win := opencv.NewWindow("Face Detection")
+	//win.ShowImage(image)
+	//opencv.WaitKey(0)
+//}
 
-func downloadFile(filepath string, url string) (*os.File, error) {
+func downloadFile(filepath string, url string) (string, error) {
+	filename := conf.TmpPath + filepath + ".jpg"
 
 	// Create the file
-	out, err := os.Create(conf.TmpPath + filepath + ".jpg")
+	out, err := os.Create(filename)
 	if err != nil  {
-		return out, err
+		return filename, err
 	}
 	defer out.Close()
 
 	// Get the data
 	resp, err := http.Get(url)
 	if err != nil {
-		return out, err
+		return filename, err
 	}
 	defer resp.Body.Close()
 
 	// Writer the body to file
 	_, err = io.Copy(out, resp.Body)
 	if err != nil  {
-		return out, err
+		return filename, err
 	}
 
-	return out, nil
+	return filename, nil
 }
 
 func main() {
