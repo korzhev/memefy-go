@@ -1,0 +1,61 @@
+{
+	"version": 0,
+	"dependencies": [
+		{
+			"importpath": "github.com/go-telegram-bot-api/telegram-bot-api",
+			"repository": "https://github.com/go-telegram-bot-api/telegram-bot-api",
+			"revision": "99170e2de436c1be90d2ef23dcf533b55a973e56",
+			"branch": "master"
+		},
+		{
+			"importpath": "github.com/gonum/blas",
+			"repository": "https://github.com/gonum/blas",
+			"revision": "b7e9c0daf02ad8ab3cf9b9b744224895a05ec23b",
+			"branch": "master"
+		},
+		{
+			"importpath": "github.com/gonum/floats",
+			"repository": "https://github.com/gonum/floats",
+			"revision": "9fe75c11ab14e9efe0445ce5b96ac8fd552be30c",
+			"branch": "master"
+		},
+		{
+			"importpath": "github.com/gonum/internal/asm",
+			"repository": "https://github.com/gonum/internal",
+			"revision": "3065419bb46aefed1d66b0c951f2ef01da74fcbe",
+			"branch": "master",
+			"path": "/asm"
+		},
+		{
+			"importpath": "github.com/gonum/lapack",
+			"repository": "https://github.com/gonum/lapack",
+			"revision": "bf35376ccb9855357148de9f033bcdfa7f834e56",
+			"branch": "master"
+		},
+		{
+			"importpath": "github.com/gonum/matrix",
+			"repository": "https://github.com/gonum/matrix",
+			"revision": "a56036f227eaa97c559569fc735dae782f3a7848",
+			"branch": "master"
+		},
+		{
+			"importpath": "github.com/gonum/matrix/mat64",
+			"repository": "https://github.com/gonum/matrix",
+			"revision": "a56036f227eaa97c559569fc735dae782f3a7848",
+			"branch": "master",
+			"path": "/mat64"
+		},
+		{
+			"importpath": "github.com/lazywei/go-opencv",
+			"repository": "https://github.com/lazywei/go-opencv",
+			"revision": "76a80c792afab341300db33893a39c06b366787b",
+			"branch": "master"
+		},
+		{
+			"importpath": "github.com/technoweenie/multipartstreamer",
+			"repository": "https://github.com/technoweenie/multipartstreamer",
+			"revision": "a90a01d73ae432e2611d178c18367fbaa13e0154",
+			"branch": "master"
+		}
+	]
+}
