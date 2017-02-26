@@ -14,6 +14,7 @@ type Configuration struct {
 
 func GetConf() (*Configuration) {
 	file, errF := os.Open("config.json")
+	defer file.Close()
 	if errF != nil {
 		log.Panic(errF)
 	}

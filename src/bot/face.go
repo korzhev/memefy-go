@@ -1,51 +1,55 @@
-// http://docs.opencv.org/master/d0/d86/tutorial_py_image_arithmetics.html#gsc.tab=0
-
 package main
 
 import (
-	//"fmt"
-	"github.com/constabulary/gb/testdata/src/e"
 	"github.com/lazywei/go-opencv/opencv"
 )
 
-type maskSize struct {
-	Height int
-	Width  int
-}
+var image = opencv.LoadImage("tmp/hd_cb7b4eb443.jpg")
+var pepe = opencv.LoadImage("img/pepe.png")
+var cascade = opencv.LoadHaarClassifierCascade("haarcascade_frontalface_alt.xml")
 
 func main() {
-	//_, currentfile, _, _ := runtime.Caller(0)
-	image := opencv.LoadImage("tmp/AgADAgAD76cxG4hdKEg3ZdzuUG6zRmMvSw0ABHkvmCDY_4B8QvEDAAEC.jpg")
-	pepe := opencv.LoadImage("img/Sad_Pepe.png")
-	cascade := opencv.LoadHaarClassifierCascade("tmp/haarcascade_frontalface_alt.xml")
+	defer image.Release()
+	defer pepe.Release()
 	faces := cascade.DetectObjects(image)
-	//res := opencv.CreateImage
+	// fix for unexpected faces changes, may be bug
+	f := make([]opencv.Rect, len(faces))
+	for i, v := range faces {
+		f[i] = *v
+	}
+	for _, face := range f {
+		size := face.Width()
+		resizedMask := opencv.Resize(pepe, size, size, opencv.CV_INTER_AREA)
+		image.SetROI(face)
 
-	for _, value := range faces {
-		// resize mask to face size
-		resizedMask := opencv.Resize(pepe, value.Width(), value.Height(), opencv.CV_INTER_AREA)
-		// Prepare ROI for image
-		roiRect := opencv.NewRect(value.X(), value.Y(), value.Width(), value.Height())
-		// some work for grey mask
-		greyPepe := resizedMask.Clone()
-		greyMask := resizedMask.Clone()
-		maskInv := resizedMask.Clone()
+		greyPepe := opencv.CreateImage(size, size, opencv.IPL_DEPTH_8U, 1)
+		defer greyPepe.Release()
+
+		greyMask := opencv.CreateImage(size, size, opencv.IPL_DEPTH_8U, 1)
+		defer greyMask.Release()
+
+		maskInv := opencv.CreateImage(size, size, opencv.IPL_DEPTH_8U, 1)
+		defer maskInv.Release()
+
 		opencv.CvtColor(resizedMask, greyPepe, opencv.CV_BGR2GRAY)
 		opencv.Threshold(greyPepe, greyMask, 10, 255, opencv.CV_THRESH_BINARY)
 		opencv.Not(greyMask, maskInv)
 
-		//rroi:= image.GetROI()
-		//image_bg = image.Clone()
-		image.SetROI(roiRect)
-		//opencv.AndWithMask()
-		//mask := new(maskSize{})
-		opencv.Rectangle(image,
-			opencv.Point{value.X() + value.Width(), value.Y()},
-			opencv.Point{value.X(), value.Y() + value.Height()},
-			opencv.ScalarAll(255.0), 1, 1, 0)
-	}
+		bg := opencv.CreateImage(image.Width(), image.Height(), image.Depth(), image.Channels())
+		defer bg.Release()
+		bg.SetROI(face)
+		opencv.AndWithMask(image, image, bg, maskInv)
 
-	win := opencv.NewWindow("Face Detection")
-	win.ShowImage(image)
-	opencv.WaitKey(0)
+		fg := opencv.CreateImage(resizedMask.Width(), resizedMask.Height(), resizedMask.Depth(), resizedMask.Channels())
+		defer fg.Release()
+		opencv.AndWithMask(resizedMask, resizedMask, fg, greyPepe)
+
+		opencv.Add(bg, fg, image)
+		image.ResetROI()
+		bg.ResetROI()
+	}
+	opencv.SaveImage("tmp/memed.jpg", image, 90)
+	//win := opencv.NewWindow("Face Detection")
+	//win.ShowImage(image)
+	//opencv.WaitKey(0)
 }

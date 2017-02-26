@@ -5,38 +5,14 @@ import (
 	"log"
 	"net/http"
 	"os"
-	//"path"
 	"bot/config"
 	"github.com/go-telegram-bot-api/telegram-bot-api"
-	//"github.com/lazywei/go-opencv/opencv"
 )
 
 var conf  = config.GetConf()
 
-//func processImg() {
-//
-//}
-
-//func findFace(filepath string) {
-	//image := opencv.LoadImage(filepath)
-	//
-	//cascade := opencv.LoadHaarClassifierCascade(path.Join(path.Dir(currentfile), "haarcascade_frontalface_alt.xml"))
-	//faces := cascade.DetectObjects(image)
-	//
-	//for _, value := range faces {
-	//	opencv.Rectangle(image,
-	//		opencv.Point{value.X() + value.Width(), value.Y()},
-	//		opencv.Point{value.X(), value.Y() + value.Height()},
-	//		opencv.ScalarAll(255.0), 1, 1, 0)
-	//}
-	//
-	//win := opencv.NewWindow("Face Detection")
-	//win.ShowImage(image)
-	//opencv.WaitKey(0)
-//}
-
-func downloadFile(filepath string, url string) (string, error) {
-	filename := conf.TmpPath + filepath + ".jpg"
+func downloadFile(filePath string, url string, ch chan <- *os.File) (string, error) {
+	filename := conf.TmpPath + filePath + ".jpg"
 
 	// Create the file
 	out, err := os.Create(filename)
@@ -73,7 +49,7 @@ func main() {
 
 	u := tgbotapi.NewUpdate(0)
 	u.Timeout = 60
-
+	ch := make(chan *os.File)
 	updates, err := bot.GetUpdatesChan(u)
 
 	for update := range updates {
@@ -88,11 +64,12 @@ func main() {
 				log.Panic(err)
 				continue
 			}
-			_, fileErr := downloadFile(imgId, url)
-			if fileErr != nil {
-				log.Panic(fileErr)
-				continue
-			}
+			go downloadFile(imgId, url, ch)
+			//_, fileErr := downloadFile(imgId, url)
+			//if fileErr != nil {
+			//	log.Panic(fileErr)
+			//	continue
+			//}
 		}
 
 		log.Printf("[%s] %s %s", update.Message.From.UserName, update.Message.Text, (*update.Message.Photo)[0].FileID)
