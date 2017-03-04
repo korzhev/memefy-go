@@ -6,17 +6,18 @@ import (
 	"net/http"
 	"os"
 	"bot/config"
+	"bot/memefy"
 	"github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
-var conf  = config.GetConf()
+var conf = config.GetConf()
 
-func downloadFile(filePath string, url string, ch chan <- *os.File) (string, error) {
+func downloadFile(filePath string, url string) (string, error) {
 	filename := conf.TmpPath + filePath + ".jpg"
 
 	// Create the file
 	out, err := os.Create(filename)
-	if err != nil  {
+	if err != nil {
 		return filename, err
 	}
 	defer out.Close()
@@ -30,11 +31,42 @@ func downloadFile(filePath string, url string, ch chan <- *os.File) (string, err
 
 	// Writer the body to file
 	_, err = io.Copy(out, resp.Body)
-	if err != nil  {
+	if err != nil {
 		return filename, err
 	}
 
 	return filename, nil
+}
+
+func process(bot *tgbotapi.BotAPI, chat int64, imgId string) {
+	url, err := bot.GetFileDirectURL(imgId)
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
+
+	filename, fileErr := downloadFile(imgId, url)
+	if fileErr != nil {
+		log.Fatal(err)
+		return
+	}
+	changedFile := memefy.FaceChange(filename)
+	errRemoveIncoming := os.Remove(filename)
+	if errRemoveIncoming != nil {
+		log.Fatal(errRemoveIncoming)
+		return
+	}
+	msg := tgbotapi.NewPhotoUpload(chat, changedFile)
+	msg.Caption = "@memefypepefy_bot kek"
+	_, errMsg := bot.Send(msg)
+	if errMsg != nil {
+		log.Fatal(errMsg)
+		return
+	}
+	errRemoveChanged := os.Remove(changedFile)
+	if errRemoveChanged != nil {
+		log.Fatal(errRemoveChanged)
+	}
 }
 
 func main() {
@@ -49,34 +81,16 @@ func main() {
 
 	u := tgbotapi.NewUpdate(0)
 	u.Timeout = 60
-	ch := make(chan *os.File)
 	updates, err := bot.GetUpdatesChan(u)
 
 	for update := range updates {
 		if update.Message == nil {
 			continue
 		}
-		photo:= *update.Message.Photo
+		photo := *update.Message.Photo
 		if photo != nil {
-			imgId:= photo[len(photo)-1].FileID
-			url, err:=bot.GetFileDirectURL(imgId)
-			if err != nil {
-				log.Panic(err)
-				continue
-			}
-			go downloadFile(imgId, url, ch)
-			//_, fileErr := downloadFile(imgId, url)
-			//if fileErr != nil {
-			//	log.Panic(fileErr)
-			//	continue
-			//}
+			imgId := photo[len(photo)-1].FileID
+			go process(bot, update.Message.Chat.ID, imgId)
 		}
-
-		log.Printf("[%s] %s %s", update.Message.From.UserName, update.Message.Text, (*update.Message.Photo)[0].FileID)
-
-		msg := tgbotapi.NewMessage(update.Message.Chat.ID, update.Message.Text)
-		msg.ReplyToMessageID = update.Message.MessageID
-
-		bot.Send(msg)
 	}
 }

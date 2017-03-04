@@ -7,12 +7,14 @@ import (
 )
 
 type Configuration struct {
-	Debug		bool
-	Token		string
-	TmpPath		string
+	Debug   bool
+	Token   string
+	TmpPath string
+	Img	string
+	Mask	string
 }
 
-func GetConf() (*Configuration) {
+func GetConf() *Configuration {
 	file, errF := os.Open("config.json")
 	defer file.Close()
 	if errF != nil {
@@ -26,4 +28,3 @@ func GetConf() (*Configuration) {
 	}
 	return conf
 }
-

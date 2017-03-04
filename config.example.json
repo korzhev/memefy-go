@@ -1,5 +1,7 @@
 {
   "Debug": true,
   "Token": "3",
-  "TmpPath": "tmp/"
+  "TmpPath": "tmp/",
+  "Img": "img/bane.png",
+  "Mask": "img/baneMask.png"
 }

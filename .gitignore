@@ -59,4 +59,3 @@ config.json
 *.out
 
 vendor/src
-haarcascade_frontalface_alt.xml
