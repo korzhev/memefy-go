@@ -47,7 +47,7 @@ func process(bot *tgbotapi.BotAPI, chat int64, imgId string) {
 
 	filename, fileErr := downloadFile(imgId, url)
 	if fileErr != nil {
-		log.Fatal(err)
+		log.Fatal(fileErr)
 		return
 	}
 	changedFile := memefy.FaceChange(filename)
